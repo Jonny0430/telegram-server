@@ -12,9 +12,15 @@ router.group('/auth', route => {
 })
 
 router.group('/user', route => {
+	route.get('/contacts', userController.getContacts)
 	route.get('/messages/:contactId', userController.getMessages)
 
-	route.post('/create-message', userController.createMessage)
+
+	route.post('/message', userController.createMessage)
+	route.post('/contact', userController.createContact)
+
+
+	route.put('message/:messageId', userController.updateMessage)
 })
 
 module.exports = router

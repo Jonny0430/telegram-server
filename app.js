@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 const { default: mongoose } = require('mongoose')
 const errorMiddleware = require('./middlewares/error.middleware')
 
+
 const app = express()
 
 // Middleware

@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 const otpModel = require('../models/otp.model')
+const BaseError = require('../middlewares/error.middleware')
 
 
 
