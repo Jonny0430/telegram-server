@@ -1,7 +1,8 @@
 const { CONST } = require('../lib/constants')
-const BaseError = require('../middlewares/error.middleware')
 const messageModel = require('../models/message.model')
 const userModel = require('../models/user.model')
+const mailService = require('../service/mail.service')
+const BaseError = require('../utils/base.error')
 
 class UserController {
 	// // [GET]
@@ -94,6 +95,43 @@ class UserController {
 		}
 	}
 
+	async messageRead(req, res, next) {
+		try {
+			const { messages } = req.body
+			const allMessages = []
+
+			for (const message of messages ) {
+				const updatedMessage = await messageModel.findByIdAndUpdate(message._id, {status: CONST.READ }, { new: true })
+				allMessages.push(updatedMessage)
+			}
+
+			res.status(200).json({ message: allMessages })
+		} catch ( error ) {
+			next (error)
+		}
+	}
+
+	async createReaction(req, res, next) {
+		try {
+			const { messageId, reaction } = req.body
+			const updatedMessage = await messageModel.findByIdAndUpdate(messageId, { reaction }, { new: true })
+			res.status(201).json({ updatedMessage })
+	} catch ( error ) {
+		next(error)
+	}
+}
+
+async sendOtp(req, res, next) {
+	try {
+		const { email } = req.body
+		const existingUser = await userModel.findOne({ email })
+		if (existingUser) throw BaseError.BadRequest('User with this email already exists')
+			await mailService.sendOtp(email)
+		rea.status(200).json({ message: 'Otp sent successfully'})
+	} catch ( error ) {
+		next(error)
+	}
+}
 
 	// PUT
 
@@ -103,6 +141,52 @@ class UserController {
 			const { text } = req.body
 			const updatedMessage = await messageModel.findByIdAndUpdate(messageId, { text }, { new: true })
 			res.status(200).json({ updatedMessage })
+		} catch (error) {
+			next(error)
+		}
+	}
+
+	async updateProfile(req, res, next) {
+		try {
+			const { userId, ...payload } = req.body
+			await userModel.findByIdAndUpdate(userId, payload)
+			res.status(200).json({ message: 'Profile updated successfully' })
+		} catch (error) {
+			next(error)
+		}
+	}
+
+	async updateEmail(req, res, next) {
+		try {
+			const { email, otp } = req.body
+			const result = await mailService.verifyOtp(email, otp)
+			if (result) {
+				const userId = '684692ee948d1bc0b1c319a9'
+				const user = await userModel.findByIdAndUpdate(userId, {email}, { new: true})
+				res.status(200).json({user})
+			}
+		} catch (error) {
+			next(error)
+		}
+	}
+ 
+
+	// [DELETE]
+	async deleteUser(req, res, next) {
+		try {
+			const userId = '684692ee948d1bc0b1c319a9'
+			await userModel.findByIdAndDelete(userId)
+			res.status(200).json({ message: 'User deleted successfully'})
+		} catch (error) {
+			next(error)
+		}
+	}
+
+	async deleteMessage(req, res, next) {
+		try {
+			const { messageId } = req.params
+			await messageModel.findByIdAndDelete(messageId)
+			res.status(200).json({ message: 'Message deleted successfully' })
 		} catch (error) {
 			next(error)
 		}
