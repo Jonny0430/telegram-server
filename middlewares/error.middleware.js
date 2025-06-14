@@ -1,4 +1,3 @@
-const BaseError = require('../errors/base.error')
 
 module.exports = function (err, req, res, next) {
 	if (err instanceof BaseError) {
